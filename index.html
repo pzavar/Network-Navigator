@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Navigator - Strategic Professional Networking</title>
+    <meta name="description" content="Manage your professional network, generate personalized messages with AI, and track your networking success. The ultimate tool for strategic career networking.">
+    <meta name="keywords" content="networking, professional relationships, AI messages, career, job search, CRM">
+    <meta name="author" content="Network Navigator">
+    <meta property="og:title" content="Network Navigator - Strategic Professional Networking">
+    <meta property="og:description" content="Manage your professional network, generate personalized messages with AI, and track your networking success.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Network Navigator - Strategic Professional Networking">
+    <meta name="twitter:description" content="Manage your professional network, generate personalized messages with AI, and track your networking success.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="simple-ai.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-network-wired"></i> Network Navigator</h1>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-section="crm">
+                    <i class="fas fa-users"></i>
+                    <span>Networking CRM</span>
+                </li>
+                <li class="nav-item" data-section="messages">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>Message Generator</span>
+                </li>
+                <li class="nav-item" data-section="guide">
+                    <i class="fas fa-book"></i>
+                    <span>Help Guide</span>
+                </li>
+                <li class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </li>
+                <li class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Relationship CRM Section -->
+            <section id="crm" class="content-section active">
+                <div class="section-header">
+                    <h2>Relationship CRM</h2>
+                    <button class="btn btn-primary" id="addContactBtn">
+                        <i class="fas fa-plus"></i> Add Contact
+                    </button>
+                </div>
+
+                <!-- Contact Filters -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="tagFilter">Filter by Tag:</label>
+                        <select id="tagFilter">
+                            <option value="">All Tags</option>
+                            <option value="hiring-manager">Hiring Manager</option>
+                            <option value="recruiter">Recruiter</option>
+                            <option value="industry-peer">Industry Peer</option>
+                            <option value="target-company">Target Company</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="warmthFilter">Warmth Level:</label>
+                        <select id="warmthFilter">
+                            <option value="">All Levels</option>
+                            <option value="cold">Cold</option>
+                            <option value="warm">Warm</option>
+                            <option value="hot">Hot</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contacts Grid -->
+                <div class="contacts-grid" id="contactsGrid">
+                    <!-- Contact cards will be dynamically generated here -->
+                </div>
+            </section>
+
+            <!-- Message Generator Section -->
+            <section id="messages" class="content-section">
+                <div class="section-header">
+                    <h2>Message Generator</h2>
+                </div>
+
+                <div class="message-generator">
+                    <div class="input-section">
+                        <h3>Contact Information</h3>
+                        <form id="messageForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="contactName">Name *</label>
+                                    <input type="text" id="contactName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactRole">Role/Title</label>
+                                    <input type="text" id="contactRole">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="contactCompany">Company</label>
+                                    <input type="text" id="contactCompany">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactLinkedIn">LinkedIn URL</label>
+                                    <input type="url" id="contactLinkedIn">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactContext">Context & Why You're Reaching Out</label>
+                                <textarea id="contactContext" rows="3" placeholder="e.g., Saw their recent post about AI trends, interested in their company's new product launch, mutual connection suggested reaching out..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactInfo">Additional Information (LinkedIn bio, recent posts, etc.)</label>
+                                <textarea id="contactInfo" rows="4" placeholder="Paste any relevant information about this person that could help personalize the message..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-magic"></i> Generate Message
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="output-section">
+                        <h3>Generated Message</h3>
+                        <div class="message-output" id="messageOutput">
+                            <p class="placeholder">Fill out the form above and click "Generate Message" to create a personalized message.</p>
+                        </div>
+                        <div class="message-actions" id="messageActions" style="display: none;">
+                            <button class="btn btn-secondary" id="regenerateBtn">
+                                <i class="fas fa-redo"></i> Regenerate
+                            </button>
+                            <button class="btn btn-success" id="saveMessageBtn">
+                                <i class="fas fa-save"></i> Save to Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Help Guide Section -->
+            <section id="guide" class="content-section">
+                <div class="section-header">
+                    <h2>Networking Playbook</h2>
+                </div>
+
+                <div class="guide-content">
+                    <div class="guide-section">
+                        <h3 class="guide-title" data-section="finding">
+                            <i class="fas fa-search"></i> Finding the Right People
+                            <i class="fas fa-chevron-down"></i>
+                        </h3>
+                        <div class="guide-content-section" id="finding">
+                            <h4>Target Hiring Managers & Decision Makers</h4>
+                            <ul>
+                                <li>Use LinkedIn's advanced search filters to find people by company, title, and location</li>
+                                <li>Look for "Hiring Manager", "VP", "Director", "Head of" titles in your target departments</li>
+                                <li>Check company pages for recent hires and team announcements</li>
+                                <li>Use mutual connections to find warm introductions</li>
+                            </ul>
+                            
+                            <h4>Research Strategy</h4>
+                            <ul>
+                                <li>Read their recent posts and comments to understand their interests</li>
+                                <li>Check their company's recent news and initiatives</li>
+                                <li>Look for shared experiences (alumni, previous companies, interests)</li>
+                                <li>Note their communication style and tone</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3 class="guide-title" data-section="outreach">
+                            <i class="fas fa-paper-plane"></i> Initial Outreach
+                            <i class="fas fa-chevron-down"></i>
+                        </h3>
+                        <div class="guide-content-section" id="outreach">
+                            <h4>Message Structure</h4>
+                            <ol>
+                                <li><strong>Personal Connection:</strong> Reference something specific about them or their work</li>
+                                <li><strong>Your Value:</strong> Briefly mention your background and what you bring</li>
+                                <li><strong>Clear Intent:</strong> State why you're reaching out (learn, network, explore opportunities)</li>
+                                <li><strong>Soft Ask:</strong> Suggest a low-commitment next step (coffee chat, brief call)</li>
+                            </ol>
+
+                            <h4>Best Practices</h4>
+                            <ul>
+                                <li>Keep messages under 200 words</li>
+                                <li>Be specific and personal, not generic</li>
+                                <li>Show genuine interest in their work/company</li>
+                                <li>Don't ask for a job directly in the first message</li>
+                                <li>Include a clear call-to-action</li>
+                            </ul>
+
+                            <h4>Timing</h4>
+                            <ul>
+                                <li>Send messages Tuesday-Thursday, 10 AM - 2 PM</li>
+                                <li>Avoid Monday mornings and Friday afternoons</li>
+                                <li>Follow up after 1-2 weeks if no response</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3 class="guide-title" data-section="building">
+                            <i class="fas fa-handshake"></i> Building Relationships
+                            <i class="fas fa-chevron-down"></i>
+                        </h3>
+                        <div class="guide-content-section" id="building">
+                            <h4>Relationship Building Timeline</h4>
+                            <ul>
+                                <li><strong>Week 1-2:</strong> Initial connection and first conversation</li>
+                                <li><strong>Week 3-4:</strong> Follow up with value (share relevant article, congratulate on achievement)</li>
+                                <li><strong>Month 2-3:</strong> Regular check-ins, offer help or insights</li>
+                                <li><strong>Month 3+:</strong> Deeper relationship, potential for referrals</li>
+                            </ul>
+
+                            <h4>Value-Add Strategies</h4>
+                            <ul>
+                                <li>Share relevant industry articles or insights</li>
+                                <li>Congratulate them on achievements or milestones</li>
+                                <li>Offer to help with their projects or challenges</li>
+                                <li>Introduce them to other valuable connections</li>
+                                <li>Provide feedback on their content or initiatives</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3 class="guide-title" data-section="asking">
+                            <i class="fas fa-bullseye"></i> Asking for Opportunities
+                            <i class="fas fa-chevron-down"></i>
+                        </h3>
+                        <div class="guide-content-section" id="asking">
+                            <h4>When to Ask</h4>
+                            <ul>
+                                <li>After 2-3 meaningful interactions</li>
+                                <li>When you've provided value to them</li>
+                                <li>When they've shown interest in your background</li>
+                                <li>During natural conversation flow</li>
+                            </ul>
+
+                            <h4>How to Ask</h4>
+                            <ul>
+                                <li>Be specific about what you're looking for</li>
+                                <li>Frame it as seeking advice or guidance</li>
+                                <li>Mention you're exploring opportunities in their field/company</li>
+                                <li>Ask if they know of any openings or can refer you to the right person</li>
+                                <li>Always offer to return the favor</li>
+                            </ul>
+
+                            <h4>Do's and Don'ts</h4>
+                            <div class="dos-donts">
+                                <div class="dos">
+                                    <h5>✅ Do's</h5>
+                                    <ul>
+                                        <li>Build genuine relationships first</li>
+                                        <li>Provide value before asking for anything</li>
+                                        <li>Be specific about your goals</li>
+                                        <li>Follow up appropriately</li>
+                                        <li>Express gratitude</li>
+                                    </ul>
+                                </div>
+                                <div class="donts">
+                                    <h5>❌ Don'ts</h5>
+                                    <ul>
+                                        <li>Ask for jobs in the first message</li>
+                                        <li>Send generic, copy-paste messages</li>
+                                        <li>Be pushy or aggressive</li>
+                                        <li>Forget to follow up</li>
+                                        <li>Only reach out when you need something</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="content-section">
+                <div class="section-header">
+                    <h2>Networking Analytics</h2>
+                </div>
+
+                <div class="analytics-dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="totalContacts">0</h3>
+                                <p>Total Contacts</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="hotContacts">0</h3>
+                                <p>Hot Relationships</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="totalInteractions">0</h3>
+                                <p>Total Interactions</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="needsFollowUp">0</h3>
+                                <p>Need Follow-up</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-charts">
+                        <div class="chart-container">
+                            <h3>Relationship Warmth Distribution</h3>
+                            <div class="warmth-chart" id="warmthChart">
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-chart-pie"></i>
+                                    <p>Loading chart data...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Interaction Activity (Last 30 Days)</h3>
+                            <div class="activity-chart" id="activityChart">
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <p>Loading activity data...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insights-section">
+                        <h3>Networking Insights</h3>
+                        <div class="insights-grid" id="insightsGrid">
+                            <!-- Insights will be dynamically generated -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="content-section">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                </div>
+
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>Data Management</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Export Data</h4>
+                                    <p>Download all your contacts and interactions as a backup file</p>
+                                </div>
+                                <button class="btn btn-primary" id="exportDataBtn">
+                                    <i class="fas fa-download"></i> Export Data
+                                </button>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Import Data</h4>
+                                    <p>Import contacts from a previously exported file</p>
+                                </div>
+                                <button class="btn btn-secondary" id="importDataBtn">
+                                    <i class="fas fa-upload"></i> Import Data
+                                </button>
+                                <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>AI Settings</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>AI Model</h4>
+                                    <p>Choose which AI model to use for message generation</p>
+                                </div>
+                                <select id="aiModelSelect" class="form-control">
+                                    <option value="distilgpt2">DistilGPT-2 (Recommended)</option>
+                                    <option value="gpt2">GPT-2 (Larger)</option>
+                                    <option value="template">Template Only (No AI)</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Message Tone</h4>
+                                    <p>Adjust the tone of generated messages</p>
+                                </div>
+                                <select id="messageToneSelect" class="form-control">
+                                    <option value="professional">Professional</option>
+                                    <option value="friendly">Friendly</option>
+                                    <option value="casual">Casual</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Notifications</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Follow-up Reminders</h4>
+                                    <p>Get notified when contacts need follow-up</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="followUpNotifications" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Reminder Frequency</h4>
+                                    <p>How often to check for follow-up reminders</p>
+                                </div>
+                                <select id="reminderFrequency" class="form-control">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Appearance</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Dark Mode</h4>
+                                    <p>Switch between light and dark themes</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="darkModeToggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Danger Zone</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Clear All Data</h4>
+                                    <p>Permanently delete all contacts and interactions</p>
+                                </div>
+                                <button class="btn btn-danger" id="clearAllDataBtn">
+                                    <i class="fas fa-trash"></i> Clear All Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Contact</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="contactForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="role">Job Title</label>
+                        <input type="text" id="role">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn URL</label>
+                        <input type="url" id="linkedin">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="howWeMet">How We Met</label>
+                    <input type="text" id="howWeMet" placeholder="e.g., LinkedIn, conference, mutual connection">
+                </div>
+                <div class="form-group">
+                    <label for="interests">Interests/Background</label>
+                    <textarea id="interests" rows="2" placeholder="Their professional interests, background, expertise..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Any additional notes about this contact..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tags">Tags (comma-separated)</label>
+                    <input type="text" id="tags" placeholder="e.g., hiring-manager, recruiter, industry-peer">
+                </div>
+                <div class="form-group">
+                    <label for="warmthLevel">Warmth Level</label>
+                    <select id="warmthLevel">
+                        <option value="cold">Cold</option>
+                        <option value="warm">Warm</option>
+                        <option value="hot">Hot</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interaction Modal -->
+    <div id="interactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Interaction</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="interactionForm">
+                <div class="form-group">
+                    <label for="interactionType">Interaction Type</label>
+                    <select id="interactionType">
+                        <option value="email">Email</option>
+                        <option value="linkedin">LinkedIn Message</option>
+                        <option value="call">Phone Call</option>
+                        <option value="meeting">In-Person Meeting</option>
+                        <option value="coffee">Coffee Chat</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="interactionNotes">Notes</label>
+                    <textarea id="interactionNotes" rows="4" placeholder="What was discussed, key takeaways, next steps..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelInteractionBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Interaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

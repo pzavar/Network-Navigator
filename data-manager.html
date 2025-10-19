@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Navigator - Data Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 2rem;
+            color: #334155;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .data-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-weight: 600;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .data-viewer {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .contact-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+        .contact-name {
+            font-weight: bold;
+            color: #1e293b;
+        }
+        .contact-company {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗄️ Network Navigator - Data Manager</h1>
+            <p>View and manage your local contact database</p>
+        </div>
+
+        <div class="stats" id="stats">
+            <!-- Stats will be populated by JavaScript -->
+        </div>
+
+        <div class="data-section">
+            <h2>📊 Database Statistics</h2>
+            <div id="databaseStats">
+                <p>Loading database information...</p>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>👥 Your Contacts</h2>
+            <div id="contactsList">
+                <p>Loading contacts...</p>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>🔧 Data Management</h2>
+            <button class="btn" onclick="exportData()">📥 Export All Data</button>
+            <button class="btn" onclick="clearAllData()">🗑️ Clear All Data</button>
+            <button class="btn" onclick="refreshData()">🔄 Refresh View</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+            <button class="btn" onclick="document.getElementById('importFile').click()">📤 Import Data</button>
+        </div>
+
+        <div class="data-section">
+            <h2>💾 Raw Database View</h2>
+            <button class="btn" onclick="showRawData()">👁️ View Raw JSON</button>
+            <div id="rawData" class="data-viewer" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function loadData() {
+            const contacts = JSON.parse(localStorage.getItem('networkNavigatorContacts') || '[]');
+            const settings = JSON.parse(localStorage.getItem('networkNavigatorSettings') || '{}');
+            
+            // Update stats
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${contacts.length}</div>
+                    <div>Total Contacts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${contacts.reduce((sum, c) => sum + (c.interactions?.length || 0), 0)}</div>
+                    <div>Total Interactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${contacts.filter(c => c.warmthLevel === 'hot').length}</div>
+                    <div>Hot Relationships</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${Math.round((localStorage.getItem('networkNavigatorContacts') || '').length / 1024)}KB</div>
+                    <div>Storage Used</div>
+                </div>
+            `;
+
+            // Update database stats
+            document.getElementById('databaseStats').innerHTML = `
+                <p><strong>Storage Type:</strong> Browser Local Storage</p>
+                <p><strong>Data Format:</strong> JSON</p>
+                <p><strong>Storage Location:</strong> ${window.location.origin}</p>
+                <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Browser:</strong> ${navigator.userAgent.split(' ')[0]}</p>
+            `;
+
+            // Update contacts list
+            if (contacts.length === 0) {
+                document.getElementById('contactsList').innerHTML = '<p>No contacts found. Add some contacts in the main app!</p>';
+            } else {
+                document.getElementById('contactsList').innerHTML = contacts.map(contact => `
+                    <div class="contact-item">
+                        <div class="contact-name">${contact.name}</div>
+                        <div class="contact-company">${contact.company || 'No company'} • ${contact.role || 'No role'}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">
+                            Tags: ${contact.tags?.join(', ') || 'None'} • 
+                            Warmth: ${contact.warmthLevel} • 
+                            Interactions: ${contact.interactions?.length || 0}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function exportData() {
+            const data = {
+                contacts: JSON.parse(localStorage.getItem('networkNavigatorContacts') || '[]'),
+                settings: JSON.parse(localStorage.getItem('networkNavigatorSettings') || '{}'),
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `network-navigator-data-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm(`Import ${data.contacts?.length || 0} contacts? This will replace your current data.`)) {
+                        if (data.contacts) localStorage.setItem('networkNavigatorContacts', JSON.stringify(data.contacts));
+                        if (data.settings) localStorage.setItem('networkNavigatorSettings', JSON.stringify(data.settings));
+                        alert('Data imported successfully!');
+                        loadData();
+                    }
+                } catch (error) {
+                    alert('Error reading file. Please make sure it\'s a valid JSON file.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL data? This cannot be undone.')) {
+                localStorage.removeItem('networkNavigatorContacts');
+                localStorage.removeItem('networkNavigatorSettings');
+                alert('All data has been cleared.');
+                loadData();
+            }
+        }
+
+        function showRawData() {
+            const rawData = {
+                contacts: JSON.parse(localStorage.getItem('networkNavigatorContacts') || '[]'),
+                settings: JSON.parse(localStorage.getItem('networkNavigatorSettings') || '{}')
+            };
+            
+            document.getElementById('rawData').style.display = 'block';
+            document.getElementById('rawData').textContent = JSON.stringify(rawData, null, 2);
+        }
+
+        function refreshData() {
+            loadData();
+        }
+
+        // Load data when page loads
+        loadData();
+    </script>
+</body>
+</html>

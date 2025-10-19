@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Component Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 2rem;
+            color: #334155;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-weight: 600;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .status {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #059669;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+        .status.loading {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #f59e0b;
+        }
+        .output {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.2/dist/transformers.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Component Test</h1>
+        
+        <div class="test-section">
+            <h2>1. Library Loading Test</h2>
+            <button class="btn" onclick="testLibrary()">Test Transformers.js Library</button>
+            <div id="libraryStatus" class="status">Click button to test library loading</div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. AI Model Loading Test</h2>
+            <button class="btn" onclick="testModelLoading()">Test AI Model Loading</button>
+            <div id="modelStatus" class="status">Click button to test model loading</div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Message Generation Test</h2>
+            <button class="btn" onclick="testMessageGeneration()">Test Message Generation</button>
+            <div id="messageStatus" class="status">Click button to test message generation</div>
+            <div id="messageOutput" class="output" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Browser Console</h2>
+            <p>Open your browser's developer console (F12) to see detailed logs and any error messages.</p>
+            <button class="btn" onclick="showConsoleInstructions()">Show Console Instructions</button>
+        </div>
+    </div>
+
+    <script>
+        let aiModel = null;
+        let modelLoaded = false;
+
+        function testLibrary() {
+            const status = document.getElementById('libraryStatus');
+            status.className = 'status loading';
+            status.textContent = 'Testing Transformers.js library...';
+
+            try {
+                if (typeof transformers !== 'undefined') {
+                    status.className = 'status success';
+                    status.textContent = '✅ Transformers.js library loaded successfully!';
+                    console.log('Transformers.js version:', transformers.version || 'Unknown');
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '❌ Transformers.js library not found. Check network connection.';
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '❌ Error loading Transformers.js: ' + error.message;
+                console.error('Library loading error:', error);
+            }
+        }
+
+        async function testModelLoading() {
+            const status = document.getElementById('modelStatus');
+            status.className = 'status loading';
+            status.textContent = 'Loading AI model... This may take a few minutes on first load.';
+
+            try {
+                if (typeof transformers === 'undefined') {
+                    status.className = 'status error';
+                    status.textContent = '❌ Transformers.js library not loaded. Please test library first.';
+                    return;
+                }
+
+                const { pipeline } = transformers;
+                
+                aiModel = await pipeline(
+                    'text-generation',
+                    'Xenova/distilgpt2',
+                    {
+                        quantized: true,
+                        progress_callback: (progress) => {
+                            console.log('Model loading progress:', progress);
+                            status.textContent = `Loading AI model... ${Math.round(progress * 100)}%`;
+                        }
+                    }
+                );
+
+                modelLoaded = true;
+                status.className = 'status success';
+                status.textContent = '✅ AI model loaded successfully! Ready for message generation.';
+                console.log('AI model loaded:', aiModel);
+
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '❌ Failed to load AI model: ' + error.message;
+                console.error('Model loading error:', error);
+            }
+        }
+
+        async function testMessageGeneration() {
+            const status = document.getElementById('messageStatus');
+            const output = document.getElementById('messageOutput');
+            
+            status.className = 'status loading';
+            status.textContent = 'Generating test message...';
+            output.style.display = 'none';
+
+            try {
+                if (!modelLoaded || !aiModel) {
+                    status.className = 'status error';
+                    status.textContent = '❌ AI model not loaded. Please load model first.';
+                    return;
+                }
+
+                const prompt = "Write a professional networking message to John Smith, who is a Software Engineer at TechCorp. The message should be professional, personalized, and ask for a brief conversation. Start with 'Hi John,' and end with 'Best regards, [Your Name]'.";
+                
+                const result = await aiModel(prompt, {
+                    max_length: 200,
+                    num_return_sequences: 1,
+                    temperature: 0.7,
+                    do_sample: true,
+                });
+
+                let generatedText = result[0].generated_text;
+                generatedText = generatedText.replace(prompt, '').trim();
+
+                status.className = 'status success';
+                status.textContent = '✅ Message generated successfully!';
+                
+                output.style.display = 'block';
+                output.textContent = generatedText;
+
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '❌ Failed to generate message: ' + error.message;
+                console.error('Message generation error:', error);
+            }
+        }
+
+        function showConsoleInstructions() {
+            alert(`To open browser console:
+            
+Windows/Linux: Press F12 or Ctrl+Shift+I
+Mac: Press Cmd+Option+I
+
+Then click the "Console" tab to see detailed logs and error messages.`);
+        }
+
+        // Auto-test library on page load
+        window.addEventListener('load', () => {
+            setTimeout(testLibrary, 1000);
+        });
+    </script>
+</body>
+</html>
