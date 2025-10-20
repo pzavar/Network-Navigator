@@ -396,6 +396,7 @@ body {
     min-height: 200px;
     font-size: 0.95rem;
     line-height: 1.6;
+    color: #1e293b;
 }
 
 .message-output .placeholder {
@@ -1133,6 +1134,12 @@ input:checked + .toggle-slider:before {
 
 .dark-mode .activity-date {
     color: #94a3b8;
+}
+
+.dark-mode .message-output {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: #e2e8f0;
 }
 
 /* Utility Classes */
