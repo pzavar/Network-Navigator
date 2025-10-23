@@ -295,6 +295,14 @@ class NetworkNavigator {
                                     <span class="interaction-date">${new Date(interaction.date).toLocaleDateString()}</span>
                                 </div>
                                 <div class="interaction-notes">${interaction.notes}</div>
+                                <div class="interaction-actions">
+                                    <button class="btn btn-sm btn-secondary" onclick="app.editInteraction('${contact.id}', '${interaction.id}')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="app.deleteInteraction('${contact.id}', '${interaction.id}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -325,23 +333,84 @@ class NetworkNavigator {
         const type = document.getElementById('interactionType').value;
         const notes = document.getElementById('interactionNotes').value;
         
-        const interaction = {
-            id: this.generateId(),
-            type: type,
-            notes: notes,
-            date: new Date().toISOString()
-        };
-
         const contact = this.contacts.find(c => c.id === this.currentContactId);
-        if (contact) {
+        if (!contact) return;
+
+        if (this.currentInteractionId) {
+            // Editing existing interaction
+            const interaction = contact.interactions.find(i => i.id === this.currentInteractionId);
+            if (interaction) {
+                interaction.type = type;
+                interaction.notes = notes;
+                // Keep the original date for edits
+            }
+        } else {
+            // Adding new interaction
+            const interaction = {
+                id: this.generateId(),
+                type: type,
+                notes: notes,
+                date: new Date().toISOString()
+            };
             contact.interactions.push(interaction);
             contact.lastContactDate = new Date().toISOString();
-            this.saveContacts();
-            this.renderContacts();
         }
 
+        this.saveContacts();
+        this.renderContacts();
         this.closeModal(document.getElementById('interactionModal'));
+        this.resetInteractionForm();
+    }
+
+    resetInteractionForm() {
         document.getElementById('interactionForm').reset();
+        this.currentInteractionId = null;
+        document.querySelector('#interactionModal .modal-header h3').textContent = 'Add Interaction';
+    }
+
+    editInteraction(contactId, interactionId) {
+        const contact = this.contacts.find(c => c.id === contactId);
+        if (!contact) return;
+
+        const interaction = contact.interactions.find(i => i.id === interactionId);
+        if (!interaction) return;
+
+        // Populate the form with existing data
+        document.getElementById('interactionType').value = interaction.type;
+        document.getElementById('interactionNotes').value = interaction.notes;
+        
+        // Store the IDs for updating
+        this.currentContactId = contactId;
+        this.currentInteractionId = interactionId;
+        
+        // Update modal title
+        document.querySelector('#interactionModal .modal-header h3').textContent = 'Edit Interaction';
+        
+        // Show the modal
+        document.getElementById('interactionModal').style.display = 'block';
+    }
+
+    deleteInteraction(contactId, interactionId) {
+        if (!confirm('Are you sure you want to delete this interaction?')) {
+            return;
+        }
+
+        const contact = this.contacts.find(c => c.id === contactId);
+        if (!contact) return;
+
+        // Remove the interaction
+        contact.interactions = contact.interactions.filter(i => i.id !== interactionId);
+        
+        // Update last contact date if this was the most recent interaction
+        if (contact.interactions.length > 0) {
+            const sortedInteractions = contact.interactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            contact.lastContactDate = sortedInteractions[0].date;
+        } else {
+            contact.lastContactDate = null;
+        }
+
+        this.saveContacts();
+        this.renderContacts();
     }
 
     // AI Model Initialization
@@ -995,7 +1064,7 @@ class NetworkNavigator {
             document.getElementById('contactForm').reset();
         }
         if (modal.id === 'interactionModal') {
-            document.getElementById('interactionForm').reset();
+            this.resetInteractionForm();
         }
     }
 }

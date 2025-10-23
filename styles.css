@@ -8,7 +8,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8fafc;
-    color: #334155;
+    color: #1e293b;
     line-height: 1.6;
 }
 
@@ -106,7 +106,7 @@ body {
 .section-header h2 {
     font-size: 2rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #0f172a;
 }
 
 /* Buttons */
@@ -239,17 +239,17 @@ body {
 .contact-info h3 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #0f172a;
     margin-bottom: 0.25rem;
 }
 
 .contact-info .company {
-    color: #64748b;
+    color: #475569;
     font-weight: 500;
 }
 
 .contact-info .role {
-    color: #94a3b8;
+    color: #64748b;
     font-size: 0.9rem;
 }
 
@@ -283,11 +283,12 @@ body {
 .contact-details p {
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
+    color: #374151;
 }
 
 .contact-details i {
     width: 16px;
-    color: #64748b;
+    color: #475569;
     margin-right: 0.5rem;
 }
 
@@ -361,7 +362,7 @@ body {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #374151;
+    color: #1f2937;
 }
 
 .form-group input,
@@ -372,6 +373,7 @@ body {
     border: 2px solid #e2e8f0;
     border-radius: 8px;
     font-size: 0.9rem;
+    color: #1f2937;
     transition: border-color 0.3s ease;
 }
 
@@ -599,12 +601,23 @@ body {
 
 .interaction-date {
     font-size: 0.8rem;
-    color: #64748b;
+    color: #475569;
 }
 
 .interaction-notes {
     font-size: 0.9rem;
-    color: #475569;
+    color: #374151;
+}
+
+.interaction-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
 }
 
 /* Responsive Design */
@@ -1140,6 +1153,10 @@ input:checked + .toggle-slider:before {
     background-color: #1e293b;
     border-color: #475569;
     color: #e2e8f0;
+}
+
+.dark-mode .interaction-notes {
+    color: #cbd5e1;
 }
 
 /* Utility Classes */
